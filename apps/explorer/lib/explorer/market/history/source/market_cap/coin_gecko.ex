@@ -13,24 +13,35 @@ defmodule Explorer.Market.History.Source.MarketCap.CoinGecko do
   alias Explorer.ExchangeRates.Source
   alias Explorer.ExchangeRates.Source.CoinGecko, as: ExchangeRatesSourceCoinGecko
   alias Explorer.Market.History.Source.MarketCap, as: SourceMarketCap
-  alias Explorer.Market.History.Source.Price.CryptoCompare
 
   @behaviour SourceMarketCap
 
   @impl SourceMarketCap
-  def fetch_market_cap(previous_days) do
-    url = ExchangeRatesSourceCoinGecko.history_url(previous_days)
+  def fetch_market_cap do
+    url = ExchangeRatesSourceCoinGecko.source_url()
 
-    case Source.http_request(url, ExchangeRatesSourceCoinGecko.headers()) do
-      {:ok, data} ->
-        result =
-          data
-          |> format_data()
+    if url do
+      case Source.http_request(url, ExchangeRatesSourceCoinGecko.headers()) do
+        {:ok, data} ->
+          result =
+            data
+            |> format_data()
 
-        {:ok, result}
+          {:ok, result}
 
-      _ ->
-        :error
+        _ ->
+          :error
+      end
+    else
+      :error
+    end
+  end
+
+  @spec date(String.t()) :: Date.t()
+  defp date(date_time_string) do
+    with {:ok, datetime, _} <- DateTime.from_iso8601(date_time_string) do
+      datetime
+      |> DateTime.to_date()
     end
   end
 
@@ -38,15 +49,12 @@ defmodule Explorer.Market.History.Source.MarketCap.CoinGecko do
   defp format_data(nil), do: nil
 
   defp format_data(data) do
-    market_caps = data["market_caps"]
+    market_data = data["market_data"]
+    market_cap = market_data["market_cap"]
 
-    for [date, market_cap] <- market_caps do
-      date = Decimal.to_integer(Decimal.round(Decimal.from_float(date / 1000)))
-
-      %{
-        market_cap: Decimal.new(to_string(market_cap)),
-        date: CryptoCompare.date(date)
-      }
-    end
+    %{
+      market_cap: Decimal.new(to_string(market_cap["usd"])),
+      date: date(data["last_updated"])
+    }
   end
 end

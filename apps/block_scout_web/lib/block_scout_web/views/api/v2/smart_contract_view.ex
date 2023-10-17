@@ -1,9 +1,6 @@
 defmodule BlockScoutWeb.API.V2.SmartContractView do
   use BlockScoutWeb, :view
 
-  import Explorer.Helper, only: [decode_data: 2]
-  import Explorer.SmartContract.Reader, only: [zip_tuple_values_with_types: 2]
-
   alias ABI.FunctionSelector
   alias BlockScoutWeb.API.V2.{Helper, TransactionView}
   alias BlockScoutWeb.SmartContractView
@@ -232,7 +229,7 @@ defmodule BlockScoutWeb.API.V2.SmartContractView do
 
     result =
       constructor_arguments
-      |> decode_data(input_types)
+      |> AddressContractView.decode_data(input_types)
       |> Enum.zip(constructor_abi["inputs"])
       |> Enum.map(fn {value, %{"type" => type} = input_arg} ->
         [ABIEncodedValueView.value_json(type, value), input_arg]
@@ -287,31 +284,28 @@ defmodule BlockScoutWeb.API.V2.SmartContractView do
     %{"type" => type, "value" => render_json(value, type)}
   end
 
-  def render_json(value, type) when is_tuple(value) do
-    value
-    |> zip_tuple_values_with_types(type)
-    |> Enum.map(fn {type, value} ->
-      render_json(value, type)
-    end)
-  end
-
-  def render_json(value, type) when is_list(value) do
-    type =
-      if String.ends_with?(type, "[]") do
-        String.slice(type, 0..-3)
-      else
-        type
-      end
-
-    value |> Enum.map(&render_json(&1, type))
-  end
-
   def render_json(value, type) when type in [:address, "address", "address payable"] do
     SmartContractView.cast_address(value)
   end
 
   def render_json(value, type) when type in [:string, "string"] do
     to_string(value)
+  end
+
+  def render_json(value, type) when is_tuple(value) do
+    value
+    |> SmartContractView.zip_tuple_values_with_types(type)
+    |> Enum.map(fn {type, value} ->
+      render_json(value, type)
+    end)
+  end
+
+  def render_json(value, type) when is_list(value) do
+    value |> Enum.map(&render_json(&1, type))
+  end
+
+  def render_json(value, _type) when is_binary(value) do
+    SmartContractView.binary_to_utf_string(value)
   end
 
   def render_json(value, _type) do

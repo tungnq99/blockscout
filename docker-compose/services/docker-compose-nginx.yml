@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 
 services:
   proxy:
@@ -9,9 +9,9 @@ services:
     volumes:
       - "../proxy:/etc/nginx/templates"
     environment:
-      BACK_PROXY_PASS: ${BACK_PROXY_PASS:-http://backend:4000}
-      FRONT_PROXY_PASS: ${FRONT_PROXY_PASS:-http://frontend:3000}
+      BACK_PROXY_PASS: ${BACK_PROXY_PASS:-http://0.0.0.0:4000}
+      FRONT_PROXY_PASS: ${FRONT_PROXY_PASS:-http://0.0.0.0:3000}
     ports:
-      - 80:80
+      - 9751:9751
       - 8080:8080
-      - 8081:8081
+      - 8090:8090

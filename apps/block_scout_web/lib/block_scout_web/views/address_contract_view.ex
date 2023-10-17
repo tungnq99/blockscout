@@ -1,9 +1,7 @@
 defmodule BlockScoutWeb.AddressContractView do
   use BlockScoutWeb, :view
 
-  import Explorer.Helper, only: [decode_data: 2]
-
-  alias ABI.FunctionSelector
+  alias ABI.{FunctionSelector, TypeDecoder}
   alias Explorer.Chain
   alias Explorer.Chain.{Address, Data, InternalTransaction, Transaction}
 
@@ -90,6 +88,16 @@ defmodule BlockScoutWeb.AddressContractView do
     else
       address_hash
     end
+  end
+
+  def decode_data("0x" <> encoded_data, types) do
+    decode_data(encoded_data, types)
+  end
+
+  def decode_data(encoded_data, types) do
+    encoded_data
+    |> Base.decode16!(case: :mixed)
+    |> TypeDecoder.decode_raw(types)
   end
 
   def format_external_libraries(libraries, conn) do

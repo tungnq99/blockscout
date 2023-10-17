@@ -47,7 +47,7 @@ defmodule Explorer.Chain.TokenTransfer do
   * `:token_id` - ID of the token (applicable to ERC-721 tokens)
   * `:transaction` - The `t:Explorer.Chain.Transaction.t/0` ledger
   * `:transaction_hash` - Transaction foreign key
-  * `:log_index` - Index of the corresponding `t:Explorer.Chain.Log.t/0` in the block.
+  * `:log_index` - Index of the corresponding `t:Explorer.Chain.Log.t/0` in the transaction.
   * `:amounts` - Tokens transferred amounts in case of batched transfer in ERC-1155
   * `:token_ids` - IDs of the tokens (applicable to ERC-1155 tokens)
   """
@@ -136,6 +136,9 @@ defmodule Explorer.Chain.TokenTransfer do
     struct
     |> cast(params, @required_attrs ++ @optional_attrs)
     |> validate_required(@required_attrs)
+    |> foreign_key_constraint(:from_address)
+    |> foreign_key_constraint(:to_address)
+    |> foreign_key_constraint(:token_contract_address)
     |> foreign_key_constraint(:transaction)
   end
 
@@ -360,12 +363,4 @@ defmodule Explorer.Chain.TokenTransfer do
   end
 
   def filter_by_type(query, _), do: query
-
-  def only_consensus_transfers_query do
-    from(token_transfer in __MODULE__,
-      inner_join: block in Block,
-      on: token_transfer.block_hash == block.hash,
-      where: block.consensus == true
-    )
-  end
 end

@@ -14,7 +14,6 @@ defmodule BlockScoutWeb.TransactionController do
 
   import BlockScoutWeb.Models.GetAddressTags, only: [get_address_tags: 2]
   import BlockScoutWeb.Models.GetTransactionTags, only: [get_transaction_with_addresses_tags: 2]
-  import Explorer.Chain.SmartContract, only: [burn_address_hash_string: 0]
 
   alias BlockScoutWeb.{
     AccessHelper,
@@ -37,7 +36,7 @@ defmodule BlockScoutWeb.TransactionController do
     :token_transfers => :optional
   }
 
-  {:ok, burn_address_hash} = Chain.string_to_address_hash(burn_address_hash_string())
+  {:ok, burn_address_hash} = Chain.string_to_address_hash("0x0000000000000000000000000000000000000000")
   @burn_address_hash burn_address_hash
 
   @default_options [

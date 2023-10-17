@@ -183,6 +183,30 @@ defmodule Explorer.ChainTest do
       assert result.token_contract_address_hash == token.contract_address_hash
     end
 
+    test "replaces existing token instance record" do
+      token = insert(:token)
+
+      params = %{
+        token_id: 1,
+        token_contract_address_hash: token.contract_address_hash,
+        metadata: %{uri: "http://example.com"}
+      }
+
+      {:ok, _} = Chain.upsert_token_instance(params)
+
+      params1 = %{
+        token_id: 1,
+        token_contract_address_hash: token.contract_address_hash,
+        metadata: %{uri: "http://example1.com"}
+      }
+
+      {:ok, result} = Chain.upsert_token_instance(params1)
+
+      assert result.token_id == Decimal.new(1)
+      assert result.metadata == params1.metadata
+      assert result.token_contract_address_hash == token.contract_address_hash
+    end
+
     test "fails to import with invalid params" do
       params = %{
         token_id: 1,
@@ -219,8 +243,7 @@ defmodule Explorer.ChainTest do
       insert(:token_instance,
         token_id: 1,
         token_contract_address_hash: token.contract_address_hash,
-        error: "no uri",
-        metadata: nil
+        error: "no uri"
       )
 
       params = %{
@@ -4880,7 +4903,7 @@ defmodule Explorer.ChainTest do
     end
   end
 
-  describe "stream_not_inserted_token_instances/2" do
+  describe "stream_unfetched_token_instances/2" do
     test "reduces with given reducer and accumulator for ERC-721 token" do
       token_contract_address = insert(:contract_address)
       token = insert(:token, contract_address: token_contract_address, type: "ERC-721")
@@ -4901,7 +4924,7 @@ defmodule Explorer.ChainTest do
           token_ids: [11]
         )
 
-      assert {:ok, [result]} = Chain.stream_not_inserted_token_instances([], &[&1 | &2])
+      assert {:ok, [result]} = Chain.stream_unfetched_token_instances([], &[&1 | &2])
       assert result.token_id == List.first(token_transfer.token_ids)
       assert result.contract_address_hash == token_transfer.token_contract_address_hash
     end
@@ -4925,7 +4948,7 @@ defmodule Explorer.ChainTest do
         token_ids: nil
       )
 
-      assert {:ok, []} = Chain.stream_not_inserted_token_instances([], &[&1 | &2])
+      assert {:ok, []} = Chain.stream_unfetched_token_instances([], &[&1 | &2])
     end
 
     test "do not fetch records with token instances" do
@@ -4953,7 +4976,7 @@ defmodule Explorer.ChainTest do
         token_contract_address_hash: token_transfer.token_contract_address_hash
       )
 
-      assert {:ok, []} = Chain.stream_not_inserted_token_instances([], &[&1 | &2])
+      assert {:ok, []} = Chain.stream_unfetched_token_instances([], &[&1 | &2])
     end
   end
 

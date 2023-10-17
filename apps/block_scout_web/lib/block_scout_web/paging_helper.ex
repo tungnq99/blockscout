@@ -129,11 +129,12 @@ defmodule BlockScoutWeb.PagingHelper do
     params
     |> Map.drop([
       "block_hash_or_number",
-      "transaction_hash_param",
-      "address_hash_param",
+      "transaction_hash",
+      "address_hash",
       "type",
       "method",
       "filter",
+      "token_address_hash",
       "q",
       "sort",
       "order"
