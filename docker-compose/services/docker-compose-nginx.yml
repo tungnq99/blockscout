@@ -12,6 +12,6 @@ services:
       BACK_PROXY_PASS: ${BACK_PROXY_PASS:-http://0.0.0.0:4000}
       FRONT_PROXY_PASS: ${FRONT_PROXY_PASS:-http://0.0.0.0:3000}
     ports:
-      - 9751:9751
+      - 80:80
       - 8080:8080
       - 8090:8090
