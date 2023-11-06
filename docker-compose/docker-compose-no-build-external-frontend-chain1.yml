@@ -27,7 +27,7 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     env_file:
-      -  ./envs/common-blockscout.env
+      -  ./envs/common-blockscout.chain1.env
     environment:
         ETHEREUM_JSONRPC_VARIANT: 'geth'
         ETHEREUM_JSONRPC_HTTP_URL: http://172.21.50.18:8545/
