@@ -1,10 +1,7 @@
 version: '3.8'
 
 services:
-  redis_db:
-    extends:
-      file: ./services/docker-compose-redis.yml
-      service: redis_db
+
 
   db:
     extends:
@@ -12,10 +9,6 @@ services:
       service: db
 
   backend:
-    depends_on:
-      - db
-      - smart-contract-verifier
-      - redis_db
     image: blockscout/blockscout:${DOCKER_TAG:-master}
     pull_policy: always
     restart: always
@@ -45,39 +38,7 @@ services:
     volumes:
       - ./logs/:/app/logs/
 
-  smart-contract-verifier:
+  proxy_chain:
     extends:
-      file: ./services/docker-compose-smart-contract-verifier.yml
-      service: smart-contract-verifier
-
-  visualizer:
-    extends:
-      file: ./services/docker-compose-visualizer.yml
-      service: visualizer
-
-  sig-provider:
-    extends:
-      file: ./services/docker-compose-sig-provider.yml
-      service: sig-provider
-
-  stats-db:
-    depends_on:
-      - backend
-    extends:
-      file: ./services/docker-compose-stats.yml
-      service: stats-db
-
-  stats:
-    depends_on:
-      - stats-db
-    extends:
-      file: ./services/docker-compose-stats.yml
-      service: stats
-
-  proxy:
-    depends_on:
-      - backend
-      - stats
-    extends:
-      file: ./services/docker-compose-nginx.yml
+      file: ./services/docker-compose-nginx.test.yml
       service: proxy
