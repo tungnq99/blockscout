@@ -9,7 +9,7 @@ services:
     volumes:
       - "../proxy/chain1:/etc/nginx/templates"
     environment:
-      BACK_PROXY_PASS: ${BACK_PROXY_PASS:-http://0.0.0.0:4000}
+      BACK_PROXY_PASS: ${BACK_PROXY_PASS:-http://0.0.0.0:4001}
       FRONT_PROXY_PASS: ${FRONT_PROXY_PASS:-http://0.0.0.0:5000}
     ports:
       - 7532:7532
